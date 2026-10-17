@@ -1,0 +1,97 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role, contact info, and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "role": { "type": "string", "enum": ["customer", "vendor", "admin"] },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "role"]
+    },
+    "RfqSync": {
+      "title": "RfqSync",
+      "description": "Real-time sync mirror of customer fabrication RFQs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "referenceNumber": { "type": "string" },
+        "customerUserId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "itemType": { "type": "string" },
+        "material": { "type": "string" },
+        "quantity": { "type": "number" },
+        "status": { "type": "string" },
+        "quoteCount": { "type": "number" },
+        "assignedVendorIds": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "referenceNumber", "customerUserId", "status"]
+    },
+    "QuoteSync": {
+      "title": "QuoteSync",
+      "description": "Real-time sync mirror of vendor quotations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "rfqId": { "type": "string" },
+        "rfqReferenceNumber": { "type": "string" },
+        "vendorId": { "type": "string" },
+        "vendorName": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "submittedAt": { "type": "string" }
+      },
+      "required": ["id", "rfqId", "vendorId", "totalAmount"]
+    },
+    "ProjectListing": {
+      "title": "ProjectListing",
+      "description": "Real-time sync mirror of fabrication project catalogue listings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "code": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "materialsAvailable": { "type": "array" },
+        "finishOptions": { "type": "array" },
+        "indicativeRateMin": { "type": "number" },
+        "indicativeRateMax": { "type": "number" },
+        "rateUnit": { "type": "string" },
+        "defaultDimensions": { "type": "string" },
+        "estimatedWeightKg": { "type": "number" },
+        "isPopular": { "type": "boolean" },
+        "leadTimeDays": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "title", "categoryId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "#/entities/UserProfile",
+      "description": "User profiles restricted to owner and authenticated users"
+    },
+    "/rfq_sync/{rfqId}": {
+      "schema": "#/entities/RfqSync",
+      "description": "Fabrication RFQ real-time status visible to owner and assigned vendors"
+    },
+    "/quotes_sync/{quoteId}": {
+      "schema": "#/entities/QuoteSync",
+      "description": "Vendor quotations visible to the submitting vendor, assigned customer, and admin"
+    },
+    "/projects/{projectId}": {
+      "schema": "#/entities/ProjectListing",
+      "description": "Marketplace project listings synced in real-time between PostgreSQL backend and mobile"
+    }
+  }
+}

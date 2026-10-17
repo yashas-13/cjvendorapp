@@ -1,0 +1,6 @@
+{
+  "name": "CJ Fabrications",
+  "description": "B2B fabrication marketplace connecting customers, builders, and architects with verified metalwork fabricators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
