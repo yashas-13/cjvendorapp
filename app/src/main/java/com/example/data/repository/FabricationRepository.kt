@@ -18,6 +18,14 @@ import com.example.data.model.RfqStatus
 import com.example.data.model.VendorProfile
 import com.example.data.model.VendorRepositoryData
 import com.example.data.model.VendorVerificationStatus
+import com.example.data.model.ServiceBooking
+import com.example.data.model.ServiceType
+import com.example.data.model.BookingStatus
+import com.example.data.model.NotificationItem
+import com.example.data.model.NotificationCategory
+import com.example.data.model.NotificationGroup
+import com.example.data.model.CustomerProfileData
+import com.example.data.model.SavedAddress
 import com.example.data.remote.FirestoreSyncManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -77,6 +85,18 @@ class FabricationRepository(context: Context) {
     // Vendors
     private val _vendors = MutableStateFlow<List<VendorProfile>>(VendorRepositoryData.sampleVendors)
     val vendors: StateFlow<List<VendorProfile>> = _vendors.asStateFlow()
+
+    // Service Bookings (Screen 5)
+    private val _serviceBookings = MutableStateFlow<List<ServiceBooking>>(emptyList())
+    val serviceBookings: StateFlow<List<ServiceBooking>> = _serviceBookings.asStateFlow()
+
+    // Notifications Feed (Screen 8)
+    private val _notifications = MutableStateFlow<List<NotificationItem>>(emptyList())
+    val notifications: StateFlow<List<NotificationItem>> = _notifications.asStateFlow()
+
+    // Customer Profile & Saved Addresses (Screen 9)
+    private val _customerProfile = MutableStateFlow(CustomerProfileData())
+    val customerProfile: StateFlow<CustomerProfileData> = _customerProfile.asStateFlow()
 
     init {
         seedInitialDemoData()
@@ -161,6 +181,172 @@ class FabricationRepository(context: Context) {
 
         _rfqList.value = listOf(demoRfq)
         _quotationsMap.value = mapOf(initialRfqId to listOf(quote1, quote2))
+
+        // Pre-seed an active order with all 9 visual stages for Screen 7 Order Tracking
+        val initialOrderMilestones = listOf(
+            OrderMilestone(
+                stepIndex = 1,
+                title = "Booking Confirmed",
+                description = "Customer requirement accepted and work docket created.",
+                state = MilestoneState.COMPLETED,
+                completedTimestamp = System.currentTimeMillis() - 7 * 86400000L,
+                remarks = "Order docket ref CJF-BK-2026-1042 locked."
+            ),
+            OrderMilestone(
+                stepIndex = 2,
+                title = "Site Measurement",
+                description = "Senior field engineer verified exact laser dimensions at site.",
+                state = MilestoneState.COMPLETED,
+                completedTimestamp = System.currentTimeMillis() - 5 * 86400000L,
+                remarks = "Opening: 14' 2\" width x 7' 0\" height. Slope compensation noted."
+            ),
+            OrderMilestone(
+                stepIndex = 3,
+                title = "Quotation Approved",
+                description = "Customer reviewed and accepted itemized BOQ quotation.",
+                state = MilestoneState.COMPLETED,
+                completedTimestamp = System.currentTimeMillis() - 4 * 86400000L,
+                remarks = "Approved by Arjun Mehta via in-app digital signature."
+            ),
+            OrderMilestone(
+                stepIndex = 4,
+                title = "Advance Paid",
+                description = "40% mobilization advance received and acknowledged.",
+                state = MilestoneState.COMPLETED,
+                completedTimestamp = System.currentTimeMillis() - 3 * 86400000L,
+                remarks = "Transaction UPI/NEFT Ref #TXN9942084 confirmed."
+            ),
+            OrderMilestone(
+                stepIndex = 5,
+                title = "Fabrication in Progress",
+                description = "CNC laser cutting, frame welding, and alignment at certified workshop.",
+                state = MilestoneState.IN_PROGRESS,
+                completedTimestamp = null,
+                remarks = "Laser profile cutting finished; currently tack welding frame tubes."
+            ),
+            OrderMilestone(
+                stepIndex = 6,
+                title = "Quality Check (QC)",
+                description = "Weld seam penetration inspection, dimension check, and 80-micron powder coat adhesion test.",
+                state = MilestoneState.PENDING,
+                remarks = "Scheduled post surface blasting."
+            ),
+            OrderMilestone(
+                stepIndex = 7,
+                title = "Ready for Delivery",
+                description = "Protective wrapping applied, loaded on flatbed vehicle with transit insurance.",
+                state = MilestoneState.PENDING,
+                remarks = "Delivery scheduled via CJF Logistics."
+            ),
+            OrderMilestone(
+                stepIndex = 8,
+                title = "Installation at Site",
+                description = "Heavy anchor bolting, vertical plum alignment, pivot lubrication, and gate motor hookup.",
+                state = MilestoneState.PENDING,
+                remarks = "4-member installation crew assigned."
+            ),
+            OrderMilestone(
+                stepIndex = 9,
+                title = "Completed & Handover",
+                description = "Final customer demonstration, joint sign-off, and 5-year workmanship warranty certificate.",
+                state = MilestoneState.PENDING,
+                remarks = "Warranty certificate CJF-WR-8821 will be issued upon completion."
+            )
+        )
+
+        val demoOrder = FabricationOrder(
+            id = "demo_ord_01",
+            orderNumber = "CJF-ORD-2026-9041",
+            rfqId = initialRfqId,
+            rfqReference = initialRef,
+            quotationId = quote1.id,
+            customerName = "Arjun Mehta",
+            customerPhone = "+91 98450 67890",
+            vendorId = "ven_001",
+            vendorName = "Apex Precision Metal Works",
+            totalAmount = quote1.grandTotal,
+            deliveryAddress = "Plot 14, Palm Meadows Phase 2, Whitefield",
+            city = "Bengaluru",
+            currentStepIndex = 5,
+            milestones = initialOrderMilestones
+        )
+        _orders.value = listOf(demoOrder)
+
+        // Pre-seed an initial service booking for Screen 5
+        val demoBooking = ServiceBooking(
+            id = "demo_bk_01",
+            referenceNumber = "CJF-BK-2026-1042",
+            serviceType = ServiceType.SITE_MEASUREMENT,
+            customerName = "Arjun Mehta",
+            customerPhone = "+91 98450 67890",
+            customerEmail = "arjun.mehta@example.com",
+            siteAddress = "Plot 14, Palm Meadows Phase 2, Whitefield",
+            landmark = "Opposite Club House",
+            city = "Bengaluru",
+            pincode = "560066",
+            preferredDate = "24-Oct-2026",
+            preferredTimeSlot = "Morning (09:00 AM - 12:00 PM)",
+            projectDetails = "Main sliding gate (14x7 ft) and first-floor balcony glass balustrade railing (42 running ft).",
+            attachedPhotoCount = 3,
+            assignedEngineerName = "Suresh Kumar (Senior Field Engineer)",
+            assignedEngineerPhone = "+91 98451 22334",
+            status = BookingStatus.ENGINEER_ASSIGNED
+        )
+        _serviceBookings.value = listOf(demoBooking)
+
+        // Pre-seed notification feed grouped into TODAY, YESTERDAY, EARLIER for Screen 8
+        _notifications.value = listOf(
+            NotificationItem(
+                id = "notif_01",
+                title = "Fabrication Milestone Updated",
+                message = "Laser cutting completed for your Main Gate (CJF-ORD-2026-9041). Now in structural welding.",
+                category = NotificationCategory.ORDER_MILESTONE,
+                group = NotificationGroup.TODAY,
+                timestamp = "10:30 AM",
+                referenceId = "demo_ord_01",
+                isRead = false
+            ),
+            NotificationItem(
+                id = "notif_02",
+                title = "Site Measurement Confirmed",
+                message = "Engineer Suresh Kumar is assigned for site visit on 24-Oct-2026 (Ref: CJF-BK-2026-1042).",
+                category = NotificationCategory.BOOKING,
+                group = NotificationGroup.TODAY,
+                timestamp = "09:15 AM",
+                referenceId = "demo_bk_01",
+                isRead = false
+            ),
+            NotificationItem(
+                id = "notif_03",
+                title = "Quotation Ready for Review",
+                message = "Apex Precision Metal Works submitted a formal quote of ₹56,050 for RFQ CJF-2026-M892.",
+                category = NotificationCategory.QUOTATION,
+                group = NotificationGroup.YESTERDAY,
+                timestamp = "Yesterday, 04:45 PM",
+                referenceId = "quote_001",
+                isRead = true
+            ),
+            NotificationItem(
+                id = "notif_04",
+                title = "Advance Payment Acknowledged",
+                message = "Mobilization advance of ₹22,420 received via UPI for Order CJF-ORD-2026-9041.",
+                category = NotificationCategory.PAYMENT,
+                group = NotificationGroup.YESTERDAY,
+                timestamp = "Yesterday, 02:20 PM",
+                referenceId = "demo_ord_01",
+                isRead = true
+            ),
+            NotificationItem(
+                id = "notif_05",
+                title = "Welcome to CJ Fabrications",
+                message = "Connect directly with certified workshop fabricators across India. Transparent quotes & milestone tracking.",
+                category = NotificationCategory.SYSTEM,
+                group = NotificationGroup.EARLIER,
+                timestamp = "14-Oct-2026",
+                referenceId = null,
+                isRead = true
+            )
+        )
     }
 
     fun setRole(role: AppRole) {
@@ -623,5 +809,142 @@ class FabricationRepository(context: Context) {
             "I would like to discuss engineering specifications and site measurement schedule."
         val encoded = URLEncoder.encode(text, "UTF-8")
         return "https://api.whatsapp.com/send?phone=$cleanPhone&text=$encoded"
+    }
+
+    // Service Booking (Screen 5)
+    fun createServiceBooking(
+        serviceType: ServiceType,
+        customerName: String,
+        customerPhone: String,
+        customerEmail: String,
+        siteAddress: String,
+        landmark: String,
+        city: String,
+        pincode: String,
+        preferredDate: String,
+        preferredTimeSlot: String,
+        projectDetails: String,
+        attachedPhotoCount: Int
+    ): ServiceBooking {
+        val rand = (1000..9999).random()
+        val ref = "CJF-BK-2026-$rand"
+        val booking = ServiceBooking(
+            id = UUID.randomUUID().toString(),
+            referenceNumber = ref,
+            serviceType = serviceType,
+            customerName = customerName.trim(),
+            customerPhone = customerPhone.trim(),
+            customerEmail = customerEmail.trim(),
+            siteAddress = siteAddress.trim(),
+            landmark = landmark.trim(),
+            city = city.trim().ifBlank { "Bengaluru" },
+            pincode = pincode.trim().ifBlank { "560066" },
+            preferredDate = preferredDate.trim(),
+            preferredTimeSlot = preferredTimeSlot,
+            projectDetails = projectDetails.trim(),
+            attachedPhotoCount = attachedPhotoCount,
+            status = BookingStatus.CONFIRMED
+        )
+
+        val list = _serviceBookings.value.toMutableList()
+        list.add(0, booking)
+        _serviceBookings.value = list
+
+        // Add corresponding notification to Screen 8
+        addNotification(
+            title = "Service Booking Confirmed ($ref)",
+            message = "${serviceType.displayName} scheduled on $preferredDate ($preferredTimeSlot). Field engineer will call before arrival.",
+            category = NotificationCategory.BOOKING,
+            group = NotificationGroup.TODAY,
+            referenceId = booking.id
+        )
+
+        logAudit("booking", booking.id, "CREATE_BOOKING", customerName, "Created service booking $ref for ${serviceType.displayName}")
+        return booking
+    }
+
+    // Notifications Centre (Screen 8)
+    fun markNotificationAsRead(notifId: String) {
+        val list = _notifications.value.map {
+            if (it.id == notifId) it.copy(isRead = true) else it
+        }
+        _notifications.value = list
+    }
+
+    fun markAllNotificationsAsRead() {
+        val list = _notifications.value.map { it.copy(isRead = true) }
+        _notifications.value = list
+    }
+
+    fun addNotification(
+        title: String,
+        message: String,
+        category: NotificationCategory,
+        group: NotificationGroup = NotificationGroup.TODAY,
+        referenceId: String? = null
+    ) {
+        val notif = NotificationItem(
+            id = UUID.randomUUID().toString(),
+            title = title,
+            message = message,
+            category = category,
+            group = group,
+            timestamp = "Just now",
+            referenceId = referenceId,
+            isRead = false
+        )
+        val list = _notifications.value.toMutableList()
+        list.add(0, notif)
+        _notifications.value = list
+    }
+
+    // Customer Profile & Saved Addresses (Screen 9)
+    fun updateCustomerProfile(profile: CustomerProfileData) {
+        _customerProfile.value = profile
+        logAudit("profile", profile.email, "UPDATE_PROFILE", profile.fullName, "Updated profile preferences")
+    }
+
+    fun addSavedAddress(address: SavedAddress) {
+        val current = _customerProfile.value
+        val updatedList = current.savedAddresses.toMutableList()
+        updatedList.add(address)
+        _customerProfile.value = current.copy(savedAddresses = updatedList)
+    }
+
+    fun deleteSavedAddress(addressId: String) {
+        val current = _customerProfile.value
+        val updatedList = current.savedAddresses.filter { it.id != addressId }
+        _customerProfile.value = current.copy(savedAddresses = updatedList)
+    }
+
+    // Quotation actions: Reject & Request Revision (Screen 6)
+    fun rejectQuotation(rfqId: String, quoteId: String, reason: String) {
+        val quotes = _quotationsMap.value[rfqId] ?: return
+        val updatedQuotes = quotes.map {
+            if (it.id == quoteId) it.copy(status = QuotationStatus.DECLINED) else it
+        }
+        val map = _quotationsMap.value.toMutableMap()
+        map[rfqId] = updatedQuotes
+        _quotationsMap.value = map
+
+        addNotification(
+            title = "Quotation Declined",
+            message = "You declined quotation $quoteId. Reason: $reason",
+            category = NotificationCategory.QUOTATION,
+            group = NotificationGroup.TODAY,
+            referenceId = quoteId
+        )
+        logAudit("quotation", quoteId, "DECLINE_QUOTE", "Customer", "Declined quote $quoteId: $reason")
+    }
+
+    fun requestQuotationRevision(rfqId: String, quoteId: String, revisionNotes: String) {
+        addNotification(
+            title = "Revision Requested for Quote",
+            message = "Fabricator notified with revision notes: $revisionNotes",
+            category = NotificationCategory.QUOTATION,
+            group = NotificationGroup.TODAY,
+            referenceId = quoteId
+        )
+        logAudit("quotation", quoteId, "REQUEST_REVISION", "Customer", "Requested revision: $revisionNotes")
     }
 }

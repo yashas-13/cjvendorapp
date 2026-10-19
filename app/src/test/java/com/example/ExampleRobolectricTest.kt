@@ -296,4 +296,114 @@ class ExampleRobolectricTest {
         assertNotNull(found)
         assertEquals(firstRef, found!!.referenceNumber)
     }
+
+    @Test
+    fun `createServiceBooking generates unique reference and creates notification`() {
+        val booking = repository.createServiceBooking(
+            serviceType = com.example.data.model.ServiceType.SITE_MEASUREMENT,
+            customerName = "Anita Desai",
+            customerPhone = "+91 98450 99887",
+            customerEmail = "anita@example.com",
+            siteAddress = "Plot 88, Indiranagar 100ft Road",
+            landmark = "Near Metro Station",
+            city = "Bengaluru",
+            pincode = "560038",
+            preferredDate = "28-Oct-2026",
+            preferredTimeSlot = "Morning (09:00 AM - 12:00 PM)",
+            projectDetails = "Balcony railing and window safety grills",
+            attachedPhotoCount = 4
+        )
+
+        assertNotNull(booking)
+        assertTrue(booking.referenceNumber.startsWith("CJF-BK-2026-"))
+        assertEquals("Anita Desai", booking.customerName)
+        assertEquals(com.example.data.model.BookingStatus.CONFIRMED, booking.status)
+
+        // Verify it was added to serviceBookings StateFlow
+        val bookings = repository.serviceBookings.value
+        assertTrue(bookings.any { it.id == booking.id })
+
+        // Verify a notification was triggered for Screen 8
+        val notifs = repository.notifications.value
+        assertTrue(notifs.any { it.referenceId == booking.id })
+    }
+
+    @Test
+    fun `order tracking contains 9 defined milestones from booking to handover`() {
+        val orders = repository.orders.value
+        assertTrue("Seed order should be present", orders.isNotEmpty())
+        val order = orders.first()
+        assertEquals(9, order.milestones.size)
+        assertEquals("Booking Confirmed", order.milestones[0].title)
+        assertEquals("Completed & Handover", order.milestones[8].title)
+        assertTrue("Step index should be within 1..9", order.currentStepIndex in 1..9)
+    }
+
+    @Test
+    fun `quotation itemized BOQ computes exact subtotal 18 percent GST and grand total`() {
+        val quote = Quotation(
+            rfqId = "test_rfq",
+            rfqReference = "CJF-2026-T101",
+            vendorId = "ven_001",
+            vendorName = "Apex Metal",
+            vendorCity = "Bengaluru",
+            vendorRating = 4.8,
+            isGstVerified = true,
+            baseFabricationCost = 20000.0,
+            materialCost = 15000.0,
+            installationCost = 3000.0,
+            transportCost = 2000.0,
+            gstRatePercent = 18.0,
+            leadTimeDays = 14,
+            validityDate = "15 Days",
+            materialGradeGuarantee = "IS 2062 Grade E250",
+            technicalNotes = "Standard notes"
+        )
+
+        // Subtotal = 20000 + 15000 + 3000 + 2000 = 40000.0
+        assertEquals(40000.0, quote.subtotal, 0.01)
+        // GST (18%) = 40000 * 0.18 = 7200.0
+        assertEquals(7200.0, quote.gstAmount, 0.01)
+        // Grand Total = 40000 + 7200 = 47200.0
+        assertEquals(47200.0, quote.grandTotal, 0.01)
+    }
+
+    @Test
+    fun `notifications centre supports marking single and all alerts as read`() {
+        repository.addNotification(
+            title = "Test Alert",
+            message = "Test message for fabricator assign",
+            category = com.example.data.model.NotificationCategory.BOOKING
+        )
+        val initialNotifs = repository.notifications.value
+        val unreadItem = initialNotifs.first { !it.isRead }
+
+        repository.markNotificationAsRead(unreadItem.id)
+        val afterSingle = repository.notifications.value
+        assertTrue(afterSingle.first { it.id == unreadItem.id }.isRead)
+
+        repository.markAllNotificationsAsRead()
+        val afterAll = repository.notifications.value
+        assertTrue(afterAll.all { it.isRead })
+    }
+
+    @Test
+    fun `customer profile updates preferences and manages saved addresses`() {
+        val initialProfile = repository.customerProfile.value
+        assertEquals("Feet & Inches (ft/in)", initialProfile.measurementUnit)
+
+        val newAddress = com.example.data.model.SavedAddress(
+            id = "test_addr_99",
+            label = "Commercial Warehouse Site",
+            fullAddress = "Plot 24, Peenya Industrial Area 2nd Stage",
+            city = "Bengaluru",
+            pincode = "560058"
+        )
+        repository.addSavedAddress(newAddress)
+        assertTrue(repository.customerProfile.value.savedAddresses.any { it.id == "test_addr_99" })
+
+        repository.deleteSavedAddress("test_addr_99")
+        assertTrue(repository.customerProfile.value.savedAddresses.none { it.id == "test_addr_99" })
+    }
 }
+

@@ -20,13 +20,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Engineering
 import androidx.compose.material.icons.filled.Handyman
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -70,10 +76,17 @@ fun HomeScreen(
     onCategoryClick: (String) -> Unit,
     onNavigateToCatalog: () -> Unit,
     onNavigateToCustomRfq: () -> Unit,
+    onNavigateToBookService: () -> Unit = {},
+    onNavigateToUploadPhotos: () -> Unit = {},
+    onNavigateToTrackOrders: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {},
+    unreadNotificationsCount: Int = 0,
     onTrackRfq: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var trackRefInput by remember { mutableStateOf("") }
+    var searchInput by remember { mutableStateOf("") }
+    var selectedSector by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
         modifier = modifier
@@ -98,28 +111,56 @@ fun HomeScreen(
                     .padding(horizontal = 20.dp, vertical = 24.dp)
             ) {
                 Column {
-                    Surface(
-                        color = ForgeAmberLight.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(20.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        Surface(
+                            color = ForgeAmberLight.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(20.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Verified,
-                                contentDescription = null,
-                                tint = ForgeAmberLight,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "VERIFIED FABRICATORS MARKETPLACE • INDIA",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = ForgeAmberLight,
-                                letterSpacing = 0.5.sp
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Verified,
+                                    contentDescription = null,
+                                    tint = ForgeAmberLight,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "VERIFIED FABRICATORS • INDIA",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = ForgeAmberLight,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
+                        }
+
+                        // Notifications Icon with Badge
+                        IconButton(
+                            onClick = onNavigateToNotifications,
+                            modifier = Modifier.testTag("home_notifications_bell")
+                        ) {
+                            BadgedBox(
+                                badge = {
+                                    if (unreadNotificationsCount > 0) {
+                                        Badge(containerColor = ForgeAmberLight, contentColor = Color.Black) {
+                                            Text("$unreadNotificationsCount", fontSize = 10.sp)
+                                        }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
 
@@ -127,70 +168,170 @@ fun HomeScreen(
 
                     Text(
                         text = "Precision Metalwork\nDirect From Certified Workshops.",
-                        fontSize = 26.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.White,
-                        lineHeight = 32.sp
+                        lineHeight = 30.sp
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Gates, SS Balcony Railings, Custom Staircases, PEB Sheds & Architectural Metalwork. Quotation-led B2B procurement for builders, architects & homeowners.",
-                        fontSize = 13.sp,
+                        text = "Gates, SS Balcony Railings, Custom Staircases, PEB Sheds & Architectural Metalwork.",
+                        fontSize = 12.sp,
                         color = SteelSlateLight,
-                        lineHeight = 18.sp
+                        lineHeight = 17.sp
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Button(
-                            onClick = onNavigateToCatalog,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("hero_browse_catalog_btn"),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = ForgeAmberLight,
-                                contentColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text(
-                                text = "Explore Designs",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Icon(
-                                imageVector = Icons.Default.ArrowForward,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
+                    // Global Search Bar (Screen 2 Requirement)
+                    OutlinedTextField(
+                        value = searchInput,
+                        onValueChange = { searchInput = it },
+                        placeholder = {
+                            Text("Search gates, grills, SS railings, sheds...", fontSize = 13.sp, color = Color.Gray)
+                        },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = ForgeAmberLight)
+                        },
+                        trailingIcon = {
+                            if (searchInput.isNotBlank()) {
+                                Button(
+                                    onClick = onNavigateToCatalog,
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = ForgeAmberLight),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    modifier = Modifier.height(32.dp).padding(end = 4.dp)
+                                ) {
+                                    Text("Find", color = Color.Black, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = ForgeAmberLight,
+                            unfocusedBorderColor = Color(0xFF3B4354),
+                            focusedContainerColor = IndustrialSurface,
+                            unfocusedContainerColor = IndustrialSurface
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("home_search_input")
+                    )
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                        OutlinedButton(
+                    // 4 Quick-Action Shortcuts Grid (Screen 2 Requirement)
+                    Text(
+                        text = "QUICK SHORTCUTS",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = ForgeAmberLight,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // 1. Book a Service
+                        QuickActionCard(
+                            title = "Book a Service",
+                            subtitle = "Site Measurement",
+                            icon = Icons.Default.Engineering,
+                            iconTint = ForgeAmberLight,
+                            onClick = onNavigateToBookService,
+                            modifier = Modifier.weight(1f).testTag("quick_action_book_service")
+                        )
+
+                        // 2. Upload Photos
+                        QuickActionCard(
+                            title = "Upload Photos",
+                            subtitle = "CAD & Drawings",
+                            icon = Icons.Default.AddAPhoto,
+                            iconTint = LaserCyanLight,
+                            onClick = onNavigateToUploadPhotos,
+                            modifier = Modifier.weight(1f).testTag("quick_action_upload_photos")
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // 3. Request a Quote
+                        QuickActionCard(
+                            title = "Request a Quote",
+                            subtitle = "Custom RFQ",
+                            icon = Icons.Default.Build,
+                            iconTint = Color(0xFF10B981),
                             onClick = onNavigateToCustomRfq,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("hero_custom_rfq_btn"),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Build,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = ForgeAmberLight
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Custom RFQ",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
-                            )
+                            modifier = Modifier.weight(1f).testTag("quick_action_request_quote")
+                        )
+
+                        // 4. Track Orders
+                        QuickActionCard(
+                            title = "Track Orders",
+                            subtitle = "9-Stage Live Status",
+                            icon = Icons.Default.Schedule,
+                            iconTint = Color(0xFF818CF8),
+                            onClick = onNavigateToTrackOrders,
+                            modifier = Modifier.weight(1f).testTag("quick_action_track_orders")
+                        )
+                    }
+                }
+            }
+        }
+
+        // CJF 5 Business Service Divisions Showcase
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = IndustrialSurface)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = "CJF Service Divisions",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Security • Structures • Interiors • Utility • Architectural Metalwork",
+                        fontSize = 11.sp,
+                        color = ForgeAmberLight,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(listOf(
+                            Triple("Security", "Gates, grills, safety doors, fencing", "Homeowners"),
+                            Triple("Structures", "Parking sheds, staircases, roofing, PEB", "Builders & Contractors"),
+                            Triple("Interiors", "Furniture frames, partitions, racks", "Interior Designers"),
+                            Triple("Utility", "Kitchen racks, drying stands, tank stands", "Homeowners & Apartments"),
+                            Triple("Architectural", "Glass & SS railings, aluminium, luxury gates", "Architects & Luxury Homes")
+                        )) { (division, products, target) ->
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = IndustrialSurfaceContainer,
+                                modifier = Modifier.width(180.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Text("CJF $division", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Text(products, fontSize = 10.sp, color = SteelSlateLight, maxLines = 2, lineHeight = 13.sp)
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text("For: $target", fontSize = 9.sp, color = LaserCyanLight, fontWeight = FontWeight.Medium)
+                                }
+                            }
                         }
                     }
                 }
@@ -202,7 +343,7 @@ fun HomeScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = IndustrialSurfaceContainer)
             ) {
@@ -274,10 +415,41 @@ fun HomeScreen(
                     )
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Sector Filter: All Sectors / Residential / Industrial
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(
+                        null to "All Sectors",
+                        "Residential" to "Residential (5 Divisions)",
+                        "Industrial" to "Industrial (10 Lines)"
+                    ).forEach { (sectorKey, label) ->
+                        val isSelected = selectedSector == sectorKey
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (isSelected) ForgeAmberLight else IndustrialSurface,
+                            modifier = Modifier.clickable { selectedSector = sectorKey }
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 11.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color.Black else Color.LightGray,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
+                val displayedCategories = if (selectedSector == null) categories else categories.filter { it.sector == selectedSector }
+
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    categories.forEach { category ->
+                    displayedCategories.forEach { category ->
                         Card(
                             onClick = { onCategoryClick(category.id) },
                             shape = RoundedCornerShape(12.dp),
@@ -421,3 +593,55 @@ private fun PillarItem(
         }
     }
 }
+
+@Composable
+private fun QuickActionCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = IndustrialSurface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF343B4B)),
+        modifier = modifier
+            .clickable { onClick() }
+            .height(82.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = iconTint.copy(alpha = 0.15f),
+                modifier = Modifier.size(38.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(imageVector = icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
+                }
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    text = title,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = subtitle,
+                    fontSize = 10.sp,
+                    color = Color.LightGray,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+        }
+    }
+}
+

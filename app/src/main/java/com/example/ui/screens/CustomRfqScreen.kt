@@ -92,12 +92,36 @@ fun CustomRfqScreen(
         "Spiral / Cantilever Staircase",
         "Roofing & PEB Shed",
         "Window Safety Grill",
-        "Mezzanine Structural Steel",
+        "Structural Steel & Mezzanine",
+        "Industrial Machinery Frames & Guards",
+        "Conveyor & Material Handling System",
+        "Sheet Metal Control Panel & Enclosure",
+        "SS Industrial & Food-Grade Processing",
+        "Warehouse Pallet Racks & Storage Systems",
+        "Industrial Piping & Tank Supports",
+        "Industrial Maintenance & Repair",
+        "Recycling & Waste Machinery Fabrication",
         "Bespoke Laser Cut Facade / Screen"
     )
 
-    val materials = listOf("Mild Steel (MS)", "Stainless Steel (SS 304)", "Stainless Steel (SS 316)", "Aluminium 6063", "Wrought Iron")
-    val finishes = listOf("Powder Coated (Matte Black)", "PU Enamel Painted", "Hot-Dip Galvanized", "Satin Hairline Finish", "PVD Gold Coating")
+    val materials = listOf(
+        "Mild Steel (MS IS 2062)",
+        "Stainless Steel (SS 304)",
+        "Stainless Steel (SS 316L Food/Pharma)",
+        "Galvanised Iron / Steel (GI)",
+        "High-Tensile Cold Formed Steel",
+        "CRCA Sheet Metal (1.6 - 3.0mm)",
+        "Aluminium 6063 / 5052",
+        "Wrought Iron / Brass Inlay"
+    )
+    val finishes = listOf(
+        "Powder Coated (Matte Black / RAL 7035)",
+        "PU Industrial Enamel Paint",
+        "Hot-Dip Galvanized (80 microns)",
+        "Satin Hairline / Electropolished",
+        "Red Oxide Industrial Primer",
+        "PVD Titanium Gold Coating"
+    )
 
     LazyColumn(
         modifier = modifier

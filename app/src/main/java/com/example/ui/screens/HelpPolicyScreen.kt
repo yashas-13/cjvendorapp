@@ -132,6 +132,113 @@ fun HelpPolicyScreen(modifier: Modifier = Modifier) {
                 }
             }
         }
+
+        // CJF Residential Fabrication Guide (Business-Planning Reference)
+        item {
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = IndustrialSurface)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "CJF | Residential Fabrication Guide",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        text = "Security • Structures • Interiors • Utility • Architectural Metalwork",
+                        fontSize = 11.sp,
+                        color = ForgeAmberLight,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = "1. Five Business Service Divisions\n" +
+                            "• CJF Security: Main gates (swing/sliding/folding), compound fencing, safety doors, window grills & gate automation for homeowners & gated communities.\n" +
+                            "• CJF Structures: Car parking sheds, outdoor staircases, PEB roofing, mezzanine floors, structural steel columns & beams for builders & contractors.\n" +
+                            "• CJF Interiors: Metal bed frames, sofa frames, dining table bases, wardrobes, TV consoles, and decorative partitions for interior designers.\n" +
+                            "• CJF Utility: Stainless-steel kitchen dish racks, under-sink frames, cylinder stands, washing-machine stands & overhead water-tank towers.\n" +
+                            "• CJF Architectural: Toughened glass & SS 304/316 balustrades, aluminium sliding systems, and CNC laser-cut facade panels for architects & luxury villas.\n\n" +
+                            "2. Suggested 7-Step Operating Model\n" +
+                            "① Site Measurement & Requirement Collection\n" +
+                            "② Design, Material Selection & Customer Approval\n" +
+                            "③ Itemized Quotation (Material, Labour, Finishing, Transport & Installation)\n" +
+                            "④ Precision Fabrication & In-shop Quality Checks\n" +
+                            "⑤ Surface Preparation & Finishing (Epoxy Primer, Powder Coat or Galvanizing)\n" +
+                            "⑥ Safe Delivery, On-site Installation & Customer Handover\n" +
+                            "⑦ After-sales Adjustments, Repairs & Maintenance Support\n\n" +
+                            "3. Key Materials & Industrial Processes\n" +
+                            "• Mild Steel (MS): Common for gates, frames, sheds & structural components (IS 2062).\n" +
+                            "• Stainless Steel (SS): SS 304/316 food-grade & marine-grade for railings, kitchen & exposed utility.\n" +
+                            "• Galvanised Iron (GI): Outdoor & utility structures with 80-micron zinc protection.\n" +
+                            "• Aluminium: Sliding window tracks, mosquito-mesh frames & lightweight louvers.\n" +
+                            "• Safety Glass: 12mm clear toughened glass engineered for balustrades & shower cubicles.\n" +
+                            "• Laser / CNC Cutting: Repeatable precision cutouts for decorative partitions and custom nameplates.\n\n" +
+                            "4. Safety & Quality Checklist\n" +
+                            "✓ Confirm exact site dimensions & mounting substrates before cutting metal.\n" +
+                            "✓ Verify material certificates for specified steel grade and gauge thickness.\n" +
+                            "✓ Inspect weld bead penetration, deburred smooth edges, and heavy-duty anchor bolts.\n" +
+                            "✓ Apply climate-appropriate anti-corrosion primer prior to topcoat.\n" +
+                            "✓ Sizing & detailing checked by qualified structural engineer for load-bearing structures.\n" +
+                            "✓ Compliance with local Indian building bylaws and fire safety codes.",
+                        fontSize = 11.sp,
+                        color = SteelSlateLight,
+                        lineHeight = 16.sp
+                    )
+                }
+            }
+        }
+
+        // CJF Industrial Fabrication Guide (Business-Planning Reference)
+        item {
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = IndustrialSurface)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "CJF | Industrial Fabrication Guide",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        text = "Heavy Steel • Machinery • Conveyors • Sheet Metal • Piping • Logistics",
+                        fontSize = 11.sp,
+                        color = LaserCyanLight,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = "1. Ten Industrial Service Lines\n" +
+                            "01. Structural Steel: Steel columns/beams, industrial shed structures, roof trusses, mezzanine platforms, walkways, staircases & pipe racks.\n" +
+                            "02. Industrial Machinery: Machine frames, mounting structures, conveyor frames, industrial guards, enclosures, hoppers & chutes.\n" +
+                            "03. Conveyor & Material Handling: Belt, roller & chain conveyors, transfer systems, loading platforms & industrial trolleys.\n" +
+                            "04. Sheet Metal: Electrical control-panel enclosures, machine cabinets, equipment mounting plates & ventilation ducting.\n" +
+                            "05. Industrial Piping & Vessels: Process piping assemblies, stainless pipelines, storage tanks, platforms & access ladders.\n" +
+                            "06. Stainless Steel Industrial: Food-grade equipment frames, pharma supports, SS tanks, sanitary worktables & wash stations.\n" +
+                            "07. Automotive & Engineering: Welding fixtures/jigs, assembly inspection fixtures, component brackets & production racks.\n" +
+                            "08. Warehouse & Logistics: Heavy-duty pallet racks, industrial shelving, loading dock ramps & safety collision barriers.\n" +
+                            "09. Industrial Maintenance & Repair: Breakdown welding, machine-frame repairs, replacement brackets & preventive maintenance.\n" +
+                            "10. Recycling & Waste Machinery: Scrap collection bins, sorting tables, crusher/shredder frames & storage silos.\n\n" +
+                            "2. Recommended CJF 3-Stage Startup Business Model\n" +
+                            "• Stage 1 (Lower Investment) — Job-work & Repair: Breakdown welding, brackets, equipment guards, small frames & factory maintenance.\n" +
+                            "• Stage 2 (Moderate Investment) — OEM Fabrication: Machine frames, precision sheet metal parts, fixtures & conveyor structures.\n" +
+                            "• Stage 3 (Higher Investment) — Heavy Industrial: Large structures, tanks, process piping & turnkey industrial engineering projects.\n\n" +
+                            "3. Compliance & Safety Standards\n" +
+                            "• Pressure vessels & regulated piping require certified welding procedures (WPS/PQR) and statutory inspections.\n" +
+                            "• Load-bearing mezzanine and crane-gantry structures require qualified structural engineering review.\n" +
+                            "• Material traceability certificates (MTC) required for food-grade SS 316L and structural steel.",
+                        fontSize = 11.sp,
+                        color = SteelSlateLight,
+                        lineHeight = 16.sp
+                    )
+                }
+            }
+        }
     }
 }
 

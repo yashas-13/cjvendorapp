@@ -7,14 +7,19 @@ import com.example.data.auth.AuthManager
 import com.example.data.auth.AuthState
 import com.example.data.model.AppRole
 import com.example.data.model.CategoryRepositoryData
+import com.example.data.model.CustomerProfileData
 import com.example.data.model.DesignItem
 import com.example.data.model.DesignRepositoryData
 import com.example.data.model.FabricationCategory
 import com.example.data.model.FabricationOrder
+import com.example.data.model.NotificationItem
 import com.example.data.model.ProjectListing
 import com.example.data.model.Quotation
 import com.example.data.model.RfqItem
 import com.example.data.model.RfqRequest
+import com.example.data.model.SavedAddress
+import com.example.data.model.ServiceBooking
+import com.example.data.model.ServiceType
 import com.example.data.model.VendorProfile
 import com.example.data.repository.DataRepository
 import com.example.data.repository.DataSyncStatus
@@ -25,6 +30,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -44,6 +50,18 @@ class FabricationViewModel(application: Application) : AndroidViewModel(applicat
     val quotationsMap: StateFlow<Map<String, List<Quotation>>> = repository.quotationsMap
     val orders: StateFlow<List<FabricationOrder>> = repository.orders
     val vendors: StateFlow<List<VendorProfile>> = repository.vendors
+
+    // Service Bookings (Screen 5)
+    val serviceBookings: StateFlow<List<ServiceBooking>> = repository.serviceBookings
+
+    // Notifications Feed (Screen 8)
+    val notifications: StateFlow<List<NotificationItem>> = repository.notifications
+    val unreadNotificationCount: StateFlow<Int> = notifications
+        .map { list -> list.count { !it.isRead } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 2)
+
+    // Customer Profile (Screen 9)
+    val customerProfile: StateFlow<CustomerProfileData> = repository.customerProfile
 
     val categories: List<FabricationCategory> = CategoryRepositoryData.categories
 
@@ -299,6 +317,77 @@ class FabricationViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch {
             dataRepository.saveProjectListing(project)
         }
+    }
+
+    // Service Booking (Screen 5)
+    fun createServiceBooking(
+        serviceType: ServiceType,
+        customerName: String,
+        customerPhone: String,
+        customerEmail: String,
+        siteAddress: String,
+        landmark: String,
+        city: String,
+        pincode: String,
+        preferredDate: String,
+        preferredTimeSlot: String,
+        projectDetails: String,
+        attachedPhotoCount: Int,
+        onSuccess: (ServiceBooking) -> Unit
+    ) {
+        val booking = repository.createServiceBooking(
+            serviceType = serviceType,
+            customerName = customerName,
+            customerPhone = customerPhone,
+            customerEmail = customerEmail,
+            siteAddress = siteAddress,
+            landmark = landmark,
+            city = city,
+            pincode = pincode,
+            preferredDate = preferredDate,
+            preferredTimeSlot = preferredTimeSlot,
+            projectDetails = projectDetails,
+            attachedPhotoCount = attachedPhotoCount
+        )
+        _userMessage.value = "Booking confirmed: ${booking.referenceNumber}"
+        onSuccess(booking)
+    }
+
+    // Notifications (Screen 8)
+    fun markNotificationAsRead(id: String) {
+        repository.markNotificationAsRead(id)
+    }
+
+    fun markAllNotificationsAsRead() {
+        repository.markAllNotificationsAsRead()
+        _userMessage.value = "All notifications marked as read"
+    }
+
+    // Profile & Saved Addresses (Screen 9)
+    fun updateCustomerProfile(profile: CustomerProfileData) {
+        repository.updateCustomerProfile(profile)
+        _userMessage.value = "Profile preferences updated"
+    }
+
+    fun addSavedAddress(address: SavedAddress) {
+        repository.addSavedAddress(address)
+        _userMessage.value = "Address added: ${address.label}"
+    }
+
+    fun deleteSavedAddress(addressId: String) {
+        repository.deleteSavedAddress(addressId)
+        _userMessage.value = "Address deleted"
+    }
+
+    // Quotation Screen actions (Screen 6)
+    fun rejectQuotation(rfqId: String, quoteId: String, reason: String) {
+        repository.rejectQuotation(rfqId, quoteId, reason)
+        _userMessage.value = "Quotation declined"
+    }
+
+    fun requestQuotationRevision(rfqId: String, quoteId: String, notes: String) {
+        repository.requestQuotationRevision(rfqId, quoteId, notes)
+        _userMessage.value = "Revision requested from fabricator"
     }
 
     override fun onCleared() {

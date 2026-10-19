@@ -186,7 +186,15 @@ fun CatalogScreen(
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
-            val materials = listOf("Mild Steel", "Stainless Steel", "Galvanized", "Aluminium", "Wrought Iron")
+            val materials = listOf(
+                "Mild Steel",
+                "Stainless Steel",
+                "Galvanized",
+                "Aluminium",
+                "High-Tensile Steel",
+                "CRCA Sheet",
+                "Wrought Iron"
+            )
             MaterialChip(
                 label = "All Materials",
                 isSelected = selectedMaterial == null,
